@@ -1,0 +1,5 @@
+{
+  "POST /apply_coupon": { "body": { "code": "string" } },
+  "POST /submit_order": { "body": { "name": "string", "email": "string", "address": "string", "items": "array" } }
+}
+

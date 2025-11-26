@@ -1,0 +1,7 @@
+UI/UX Guidelines for Checkout Page
+
+- Validation errors must be displayed in red color with clear text near the input.
+- The 'Pay Now' button should be green and visually prominent.
+- On successful payment, show a green message "Payment Successful!".
+- Discount feedback should be shown inline near discount code field.
+- Quantity inputs must allow integer values >= 1.

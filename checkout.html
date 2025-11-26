@@ -1,0 +1,177 @@
+
+---
+
+# Support documents & `checkout.html`
+
+Save these files under `support_docs/` and repo root for checkout.
+
+### `checkout.html` (save to project root)
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>E-Shop Checkout</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .error { color: red; }
+    .success { color: green; }
+    .green-btn { background: #28a745; color: white; border: none; padding: 10px 16px; cursor: pointer; border-radius: 4px;}
+    .cart-item { margin-bottom: 10px; }
+    #payment-success { display:none; }
+  </style>
+</head>
+<body>
+  <h1>E-Shop - Checkout</h1>
+
+  <div id="products">
+    <div class="product">
+      <h3>Item A - $30 <button data-id="itemA" class="add-to-cart">Add to Cart</button></h3>
+    </div>
+    <div class="product">
+      <h3>Item B - $20 <button data-id="itemB" class="add-to-cart">Add to Cart</button></h3>
+    </div>
+    <div class="product">
+      <h3>Item C - $15 <button data-id="itemC" class="add-to-cart">Add to Cart</button></h3>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Cart Summary</h2>
+  <div id="cart-summary">
+    <div id="cart-items"></div>
+    <div>
+      Discount Code: <input id="discount-code" type="text" />
+      <button id="apply-discount">Apply</button>
+      <div id="discount-msg" class="error"></div>
+    </div>
+    <div>
+      Shipping:
+      <label><input type="radio" name="shipping" value="standard" checked/> Standard (Free)</label>
+      <label><input type="radio" name="shipping" value="express" /> Express ($10)</label>
+    </div>
+    <h3>Total: $<span id="total">0.00</span></h3>
+  </div>
+
+  <hr>
+
+  <h2>User Details</h2>
+  <form id="checkout-form" novalidate>
+    <div>
+      Name: <input id="name" name="name" required />
+      <span class="error" id="err-name"></span>
+    </div>
+    <div>
+      Email: <input id="email" name="email" required />
+      <span class="error" id="err-email"></span>
+    </div>
+    <div>
+      Address: <input id="address" name="address" required />
+      <span class="error" id="err-address"></span>
+    </div>
+
+    <div>
+      Payment:
+      <label><input type="radio" name="payment" value="card" checked/> Credit Card</label>
+      <label><input type="radio" name="payment" value="paypal" /> PayPal</label>
+    </div>
+
+    <button id="pay-now" type="button" class="green-btn">Pay Now</button>
+  </form>
+
+  <div id="payment-success" class="success">Payment Successful!</div>
+
+  <script>
+    const prices = { itemA: 30, itemB: 20, itemC: 15 };
+    let cart = {};
+
+    function renderCart() {
+      const el = document.getElementById('cart-items');
+      el.innerHTML = '';
+      for(const id in cart) {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `${id} - $${prices[id]} x <input type="number" min="1" value="${cart[id]}" data-id="${id}" class="qty" />`;
+        el.appendChild(div);
+      }
+      updateTotal();
+      attachQtyListeners();
+    }
+
+    function updateTotal() {
+      let subtotal = 0;
+      for(const id in cart) subtotal += prices[id] * cart[id];
+      const shipping = document.querySelector('input[name="shipping"]:checked').value === 'express' ? 10 : 0;
+      let total = subtotal + shipping;
+      const code = window.appliedCode || null;
+      if(code === 'SAVE15') total = +(total * 0.85).toFixed(2);
+      document.getElementById('total').innerText = total.toFixed(2);
+    }
+
+    document.querySelectorAll('.add-to-cart').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const id = e.target.dataset.id;
+        cart[id] = (cart[id] || 0) + 1;
+        renderCart();
+      });
+    });
+
+    function attachQtyListeners() {
+      document.querySelectorAll('.qty').forEach(q=>{
+        q.addEventListener('change', (e)=>{
+          const id = e.target.dataset.id;
+          const val = parseInt(e.target.value) || 1;
+          cart[id] = val;
+          updateTotal();
+        });
+      });
+    }
+
+    document.getElementById('apply-discount').addEventListener('click', ()=>{
+      const code = document.getElementById('discount-code').value.trim();
+      const msg = document.getElementById('discount-msg');
+      if(code === 'SAVE15') {
+        window.appliedCode = 'SAVE15';
+        msg.innerText = 'Applied SAVE15 — 15% off';
+        msg.className = '';
+      } else {
+        window.appliedCode = null;
+        msg.innerText = 'Invalid code';
+        msg.className = 'error';
+      }
+      updateTotal();
+    });
+
+    function validateForm() {
+      let ok = true;
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const address = document.getElementById('address').value.trim();
+
+      document.getElementById('err-name').innerText = '';
+      document.getElementById('err-email').innerText = '';
+      document.getElementById('err-address').innerText = '';
+
+      if(!name) { document.getElementById('err-name').innerText = 'Required'; ok=false }
+      if(!address) { document.getElementById('err-address').innerText = 'Required'; ok=false }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!emailRegex.test(email)) { document.getElementById('err-email').innerText = 'Invalid email'; ok=false }
+
+      return ok;
+    }
+
+    document.getElementById('pay-now').addEventListener('click', ()=>{
+      if(!validateForm()) return;
+      // simulate payment success
+      document.getElementById('payment-success').style.display = 'block';
+    });
+
+    // update total when shipping method changes
+    document.querySelectorAll('input[name="shipping"]').forEach(radio=>{
+      radio.addEventListener('change', updateTotal);
+    });
+
+  </script>
+</body>
+</html>

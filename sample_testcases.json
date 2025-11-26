@@ -1,0 +1,18 @@
+{
+  "testcases": [
+    {
+      "Test_ID": "TC-001",
+      "Feature": "Discount Code",
+      "Test_Scenario": "Apply valid discount code 'SAVE15'.",
+      "Expected_Result": "Total price is reduced by 15%.",
+      "Grounded_In": "product_specs.md"
+    },
+    {
+      "Test_ID": "TC-002",
+      "Feature": "Discount Code",
+      "Test_Scenario": "Apply invalid discount code 'ABC'.",
+      "Expected_Result": "Display 'Invalid code' message and no discount applied.",
+      "Grounded_In": "product_specs.md"
+    }
+  ]
+}
